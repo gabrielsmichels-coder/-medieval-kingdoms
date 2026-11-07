@@ -24,17 +24,24 @@ export function transact(action?: Action, now = Date.now()): Promise<VillageStat
           update: {},
         });
         const state = JSON.parse(row.state) as VillageState;
+        state.worldEpoch ??=
+          state.reports.find((r) => r.id === 'welcome')?.time ?? state.lastUpdate;
+        const simulatedNow = now + (state.timeOffset ?? 0);
+        advance(state, simulatedNow, speed);
+        state.productionPeriodSeconds = Number(process.env.RESOURCE_PERIOD_SECONDS || 1);
+        if (![1, 3600].includes(state.productionPeriodSeconds))
+          throw new Error('RESOURCE_PERIOD_SECONDS must be 1 or 3600.');
         const receipt = action
           ? await tx.actionReceipt.findUnique({
               where: { villageId_requestId: { villageId: row.id, requestId: action.requestId } },
             })
           : null;
         if (action && !receipt) {
-          act(state, action, now, speed);
+          act(state, action, simulatedNow, speed);
           await tx.actionReceipt.create({
             data: { villageId: row.id, requestId: action.requestId },
           });
-        } else advance(state, now, speed);
+        } else advance(state, simulatedNow, speed);
         const changed = await tx.village.updateMany({
           where: { id: row.id, version: row.version },
           data: { state: JSON.stringify(state), name: state.name, version: { increment: 1 } },

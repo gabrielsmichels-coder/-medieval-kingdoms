@@ -60,6 +60,7 @@ import {
   type VillageState,
 } from '../shared/engine';
 import { useGame } from './store';
+import TestControls from './TestControls';
 import ArmyPlanner from './ArmyPlanner';
 import VillageMap, { BuildingArt } from './VillageMap';
 const icons: Record<string, LucideIcon> = {
@@ -152,7 +153,8 @@ function JobItem({ job, now }: { job: Job; now: number }) {
 }
 function effect(key: string, level: number) {
   if (!level) return 'Not yet constructed';
-  if (['timber', 'clay', 'iron'].includes(key)) return `${fmt(production(level))} / hour (base)`;
+  if (['timber', 'clay', 'iron'].includes(key))
+    return `${fmt(production(level))} / ${useGame.getState().state?.productionPeriodSeconds === 1 ? 'second' : 'hour'} (base)`;
   if (key === 'warehouse') return `${fmt(capacity(level))} per resource`;
   if (key === 'farm') return `${fmt(farmCapacity(level))} population`;
   if (key === 'headquarters')
@@ -1067,8 +1069,8 @@ export default function App() {
                     </strong>
                     <span>
                       {'+'}
-                      {t(fmt(rate[r]))}
-                      {t('/h')}{' '}
+                      {t(fmt(rate[r] / (state.productionPeriodSeconds === 1 ? 3600 : 1)))}
+                      {state.productionPeriodSeconds === 1 ? '/s' : '/h'}{' '}
                       <i title={t('Time until storage is full')}>
                         {t(
                           available[r] >= cap
@@ -1151,7 +1153,13 @@ export default function App() {
                       {t(' points')}
                     </span>
                   </div>
-                  <VillageMap state={state} selected={selected} onSelect={setSelected} />
+                  <TestControls />
+                  <VillageMap
+                    state={state}
+                    now={serverNow}
+                    selected={selected}
+                    onSelect={setSelected}
+                  />
                   <div className="map-footer">
                     <span>
                       <span className="status-dot" />

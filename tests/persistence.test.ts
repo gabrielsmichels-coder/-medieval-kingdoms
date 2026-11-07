@@ -93,6 +93,14 @@ test('SQLite survives client restart, rolls back transactions, and serializes co
       assert.equal(done.troops.spear, 3);
       assert.ok(done.research.includes('spears'));
       assert.equal(done.jobs.length, 0);
+      const skip = { type: 'advanceTime' as const, seconds: 60, requestId: 'persisted-time-skip' };
+      const jumped = await transact(skip, done.lastUpdate);
+      assert.equal(jumped.timeOffset, 60000);
+      const reread = await transact(undefined, done.lastUpdate + 1000);
+      assert.equal(reread.lastUpdate, jumped.lastUpdate + 1000);
+      await transact(skip, done.lastUpdate + 1000);
+      const again = await transact(undefined, done.lastUpdate + 2000);
+      assert.equal(again.timeOffset, 60000);
     } finally {
       await prisma.$disconnect();
     }

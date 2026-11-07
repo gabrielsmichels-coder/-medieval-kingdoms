@@ -24,6 +24,28 @@ export const useLanguage = create<{
 }));
 export const locale = () => (useLanguage.getState().language === 'en' ? 'en-US' : 'pt-BR');
 export const ptBR: Record<string, string> = {
+  'Test realm': 'Reino de testes',
+  'Resources per second': 'Recursos por segundo',
+  'Resources per hour': 'Recursos por hora',
+  'Advance time': 'Avançar tempo',
+  'Advances production, construction, training, research and the village clock. Requirements and costs still apply.':
+    'Avança produção, construções, tropas, pesquisas e o relógio da aldeia. Custos e requisitos continuam valendo.',
+  Lighting: 'Iluminação',
+  Weather: 'Clima',
+  Auto: 'Automático',
+  Morning: 'Manhã',
+  Day: 'Dia',
+  Dusk: 'Entardecer',
+  Night: 'Noite',
+  Clear: 'Céu limpo',
+  Rain: 'Chuva',
+  Farmer: 'Fazendeiro',
+  Soldier: 'Soldado',
+  'Building names': 'Nomes dos edifícios',
+  'Construction sites': 'Locais de construção',
+  'Visual upgrades every 5 levels': 'Evolução visual a cada 5 níveis',
+  'Choose a valid time advance.': 'Escolha um avanço de tempo válido.',
+
   'Village Overview': 'Visão geral da aldeia',
   Buildings: 'Edifícios',
   Military: 'Militar',
@@ -272,8 +294,8 @@ export const ptBR: Record<string, string> = {
   'View the chronicles': 'Ver as crônicas',
   'Close handbook': 'Fechar manual',
   'Plant the seeds of a kingdom.': 'Plante as sementes de um reino.',
-  'Your timber camp, clay pit, and iron mine produce resources every hour, even while you’re away. Upgrade them to grow your economy.':
-    'Seu bosque, poço de argila e mina de ferro produzem recursos a cada hora, mesmo enquanto você está fora. Melhore-os para expandir sua economia.',
+  'Your timber camp, clay pit, and iron mine produce resources continuously, even while you’re away. Upgrade them to grow your economy.':
+    'Seu bosque, poço de argila e mina de ferro produzem recursos continuamente, mesmo enquanto você está fora. Melhore-os para expandir sua economia.',
   'Build your foundations.': 'Estabeleça suas bases.',
   'Click a village building to upgrade it. Your Headquarters unlocks new buildings and speeds up construction.':
     'Toque em um edifício para melhorá-lo. O Edifício Principal libera novas construções e reduz os tempos de construção.',
@@ -353,6 +375,7 @@ export const ptBR: Record<string, string> = {
 // Translate legacy persisted reports at display time; stable game IDs and saved names stay intact.
 function translateDynamic(text: string): string {
   const rules: [RegExp, (...args: string[]) => string][] = [
+    [/^(.+) \/ second \(base\)$/, (_, n) => `${n} / segundo (base)`],
     [/^UPGRADE TO LEVEL (\d+)$/, (_, n) => `MELHORAR PARA O NÍVEL ${n}`],
     [/^LEVEL (\d+)$/, (_, n) => `NÍVEL ${n}`],
     [/^Level (\d+)$/, (_, n) => `Nível ${n}`],

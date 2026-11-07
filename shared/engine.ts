@@ -31,11 +31,15 @@ export type VillageState = {
   jobs: Job[];
   reports: Report[];
   requestIds: string[];
+  worldEpoch?: number;
+  timeOffset?: number;
+  productionPeriodSeconds?: number;
   armyPlan?: Record<string, number>;
 };
 export function initialState(now = Date.now()): VillageState {
   return {
     name: 'Oakheart',
+    worldEpoch: now,
     resources: {
       wood: balance.startingResources,
       clay: balance.startingResources,
@@ -84,9 +88,9 @@ export function population(s: VillageState) {
 }
 export function rates(s: VillageState, speed: number): Cost {
   return {
-    wood: production(s.buildings.timber) * speed,
-    clay: production(s.buildings.clay) * speed,
-    iron: production(s.buildings.iron) * speed,
+    wood: production(s.buildings.timber) * speed * (3600 / (s.productionPeriodSeconds ?? 3600)),
+    clay: production(s.buildings.clay) * speed * (3600 / (s.productionPeriodSeconds ?? 3600)),
+    iron: production(s.buildings.iron) * speed * (3600 / (s.productionPeriodSeconds ?? 3600)),
   };
 }
 function report(s: VillageState, time: number, title: string, detail: string, kind: string) {
@@ -184,7 +188,8 @@ function addJob(
   });
 }
 export type Action = {
-  type: 'upgrade' | 'recruit' | 'research' | 'rename' | 'formation';
+  type: 'upgrade' | 'recruit' | 'research' | 'rename' | 'formation' | 'advanceTime';
+  seconds?: number;
   formation?: Record<string, number>;
   key?: string;
   quantity?: number;
@@ -195,7 +200,13 @@ export function act(s: VillageState, a: Action, now: number, speed: number) {
   if (s.requestIds.includes(a.requestId)) return s;
   advance(s, now, speed);
   const key = a.key || '';
-  if (a.type === 'upgrade') {
+  if (a.type === 'advanceTime') {
+    if (![60, 300, 3600, 21600, 86400].includes(a.seconds ?? 0))
+      throw new Error('Choose a valid time advance.');
+    const amount = a.seconds! * 1000;
+    advance(s, now + amount, speed);
+    s.timeOffset = (s.timeOffset ?? 0) + amount;
+  } else if (a.type === 'upgrade') {
     const def = buildings[key];
     if (!def) throw new Error('Unknown building.');
     if (unmet(s, def.requires).length) throw new Error('Building requirements are not met.');

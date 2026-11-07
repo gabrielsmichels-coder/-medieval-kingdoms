@@ -50,6 +50,16 @@ A interface abre em português do Brasil por padrão. Para mudar, acesse **Confi
 
 The interface defaults to Brazilian Portuguese and supports English in Settings. The catalog and dynamic report translations are in `src/i18n.ts`. Locale coverage is checked by `tests/i18n.test.ts`; browser checks verify switching, reload persistence, and Portuguese defaults on a fresh device.
 
+## Aldeia viva e ferramentas de teste
+
+A aldeia usa arte SVG original, com praça central, caminhos, bosque, campo agrícola e edifícios espaçados. Os rótulos aparecem na seleção; “Nomes dos edifícios” mostra todos, e “Locais de construção” revela os terrenos ainda vazios. As estruturas mudam de aparência nos níveis 5, 10, 15, 20, 25 e 30: madeira, alvenaria, pedra, torres, alas e detalhes nobres, respeitando o nível máximo de cada edifício.
+
+A economia de teste produz **por segundo**: `RESOURCE_PERIOD_SECONDS=1` (padrão do servidor e Blueprint). Para voltar à economia por hora, use `3600`. `GAME_SPEED` continua multiplicando as taxas e reduzindo os tempos. O cálculo interno mantém taxas normalizadas por hora para preservar o motor, e a interface converte para `/s` quando apropriado. A troca de modo não recalcula retroativamente recursos antigos.
+
+Na visão geral, **Avançar tempo** oferece +1 min, +5 min, +1 h, +6 h e +24 h. O servidor processa os eventos em ordem, preserva custos, requisitos e limite do armazém, e salva um deslocamento do relógio por aldeia. Recursos e novos trabalhos continuam avançando normalmente depois do salto; recibos persistentes impedem que uma repetição da requisição avance duas vezes. Esse controle pertence à versão de teste e afeta o perfil compartilhado.
+
+O ciclo automático dura 12 minutos por dia da aldeia, com manhã, dia, entardecer e noite. Chuvas aparecem em períodos determinísticos do relógio da aldeia. As opções **Iluminação** e **Clima** permitem visualizar qualquer condição sem alterar o jogo. À noite, no entardecer ou na chuva, janelas, tochas e fogueiras iluminam o cenário. Árvores, estandartes, fumaça e chamas têm animações leves; fazendeiros e soldados percorrem os caminhos. Preferências de movimento reduzido desativam os efeitos e ocultam os NPCs em movimento. Ajuste o ciclo e as faixas visuais em `shared/world.ts` e o desenho em `src/VillageMap.tsx`.
+
 ## Configuration
 
 `shared/config.ts` contains all building definitions, max levels, costs, growth factors, prerequisites, construction durations, unit costs / statistics / times, technologies / effects, production and storage tables, farm growth, defensive modifiers, population rules, and queue limits. `GAME_SPEED` scales production, construction, research, and recruitment. Client resource counters interpolate the authoritative snapshot; the server validates every purchase.

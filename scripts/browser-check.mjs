@@ -49,6 +49,20 @@ try {
   await page.getByRole('heading', { name: 'Timber Camp', exact: true }).waitFor();
   await page.getByRole('button', { name: 'Upgrade building', exact: true }).click();
   await page.getByText('Lv. 2', { exact: true }).waitFor();
+  await page.getByRole('button', { name: '+1 min', exact: true }).click();
+  await page.getByRole('button', { name: 'Timber Camp, level 2' }).waitFor();
+  const jumped = await (await fetch(base + '/api/state')).json();
+  assert.equal(jumped.state.timeOffset, 60000);
+  assert.equal(jumped.state.productionPeriodSeconds, 1);
+  assert.equal(jumped.state.jobs.length, 0);
+  assert.equal(await page.locator('.village-npc').count(), 8);
+  await page.getByLabel('Lighting', { exact: true }).selectOption('Night');
+  await page.getByLabel('Weather', { exact: true }).selectOption('Rain');
+  assert.equal(await page.locator('.phase-night .night-lights').count(), 1);
+  assert.equal(await page.locator('.rain-drop').count(), 90);
+  await page.screenshot({ path: 'test-results/night-rain.png', fullPage: true });
+  await page.getByLabel('Lighting', { exact: true }).selectOption('Auto');
+  await page.getByLabel('Weather', { exact: true }).selectOption('Auto');
   await page.getByRole('button', { name: 'Buildings', exact: true }).click();
   await page.getByRole('navigation').getByRole('button', { name: 'Military', exact: true }).click();
   await page.getByRole('heading', { name: 'Raise your banners' }).waitFor();
@@ -98,7 +112,7 @@ try {
   await fresh.close();
   assert.deepEqual(errors, []);
   console.log(
-    'Browser checks passed: desktop, map selection, purchase, navigation, settings persistence, PT-BR default, language switching and persistence, mobile layout, no runtime errors.',
+    'Browser checks passed: desktop, map selection, purchase, navigation, settings persistence, PT-BR default, language switching and persistence, server time advance, night lighting, rain, animated NPCs, mobile layout, no runtime errors.',
   );
 } finally {
   await browser.close();

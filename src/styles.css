@@ -2675,3 +2675,344 @@ nav button {
 .army-selection > label > span {
   line-height: 1.5;
 }
+/* Living village: a continuous meadow, spacious paths, and restrained map labels. */
+.living-village .map-shell {
+  min-height: 0;
+  border-radius: 0;
+  border-color: #788662;
+}
+.living-village .map-viewport {
+  aspect-ratio: 1000/680;
+  min-height: 0;
+  max-height: none;
+  background: #586e3e;
+}
+.living-village .living-svg {
+  min-height: 0;
+  height: auto;
+  aspect-ratio: 1000/680;
+  max-height: none;
+}
+.living-village .map-building .building-label {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s;
+}
+.living-village .map-building:hover .building-label,
+.living-village .map-building:focus-visible .building-label,
+.living-village .map-building.selected .building-label,
+.living-village .map-building.show-label .building-label {
+  opacity: 1;
+}
+.living-village .map-building .selection-ring {
+  stroke: transparent;
+  fill: transparent;
+}
+.living-village .map-building.selected .selection-ring,
+.living-village .map-building:hover .selection-ring {
+  fill: #dfce8055;
+  stroke: #ead28a;
+  stroke-width: 1.5;
+  stroke-dasharray: 5 5;
+}
+.world-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #edf0e1;
+  border: 1px solid #d9e0cc;
+  border-radius: 5px 5px 0 0;
+  padding: 11px 13px;
+  font-size: 10px;
+  color: #6d8055;
+}
+.world-toolbar > span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.world-toolbar b {
+  font-variant-numeric: tabular-nums;
+  font-size: 9px;
+  color: #98a286;
+  font-weight: 400;
+}
+.world-toolbar > div {
+  display: flex;
+  gap: 6px;
+}
+.world-toolbar select {
+  max-width: 125px;
+  background: #fafbf3;
+  border: 1px solid #d8dfc9;
+  padding: 5px;
+  border-radius: 3px;
+  color: #687c54;
+  font-size: 9px;
+}
+.world-options {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 11px 12px;
+  background: #f3f5eb;
+  border-inline: 1px solid #dce3d0;
+  font-size: 8px;
+  color: #829470;
+  flex-wrap: wrap;
+}
+.world-options label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+.world-options input {
+  accent-color: #627b4d;
+  width: 12px;
+  height: 12px;
+}
+.world-options > span {
+  margin-left: auto;
+  font-size: 7px;
+  color: #9ba78e;
+}
+.weather-badge {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 8px;
+  background: #eef1e0dd;
+  padding: 6px 9px;
+  border-radius: 4px;
+  color: #71835e;
+  pointer-events: none;
+}
+.test-controls {
+  background: #f4eedc;
+  border: 1px solid #e2d7b7;
+  border-radius: 5px;
+  padding: 12px;
+  margin-bottom: 14px;
+  color: #8c7c52;
+}
+.test-controls > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.test-controls > div + div {
+  margin-top: 9px;
+}
+.test-controls strong {
+  font-size: 10px;
+  font-weight: 600;
+}
+.test-controls span {
+  font-size: 9px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.test-controls > div:first-child > span {
+  margin-left: auto;
+  font-size: 8px;
+}
+.test-controls button {
+  border: 1px solid #d6c89f;
+  border-radius: 3px;
+  background: #fffaf0;
+  padding: 6px 9px;
+  font-size: 9px;
+  color: #887449;
+}
+.test-controls button:hover {
+  background: #e9ddb9;
+}
+.test-controls button:disabled {
+  opacity: 0.5;
+}
+.test-controls small {
+  display: block;
+  font-size: 8px;
+  margin-top: 9px;
+  line-height: 1.7;
+  color: #a39267;
+}
+.landscape {
+  transition: filter 2s;
+}
+.phase-night .landscape {
+  filter: brightness(0.48) saturate(0.73);
+}
+.phase-dusk .landscape {
+  filter: brightness(0.78) sepia(0.15);
+}
+.phase-morning .landscape {
+  filter: brightness(1.06) saturate(0.88);
+}
+.is-raining .landscape {
+  filter: brightness(0.78) saturate(0.8);
+}
+.phase-night.is-raining .landscape {
+  filter: brightness(0.4) saturate(0.7);
+}
+.lit-window {
+  opacity: 0;
+}
+.phase-night .lit-window,
+.phase-dusk .lit-window,
+.is-raining .lit-window {
+  opacity: 1;
+}
+.tree-crown {
+  transform-box: fill-box;
+  transform-origin: bottom center;
+  animation: tree-sway 6s ease-in-out infinite;
+}
+.banner-cloth {
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation: banner-wave 2.2s ease-in-out infinite;
+}
+.flame-flicker {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  animation: flame-flicker 0.7s ease-in-out infinite alternate;
+}
+.npc-steps {
+  transform-box: fill-box;
+  transform-origin: top center;
+  animation: npc-step 0.55s ease-in-out infinite alternate;
+}
+.rain-drop {
+  animation: rain-fall 0.8s linear infinite;
+}
+.chimney-smoke {
+  animation: smoke-drift 4s ease-out infinite;
+}
+.construction-spark {
+  animation: construction-pulse 1.3s ease-in-out infinite;
+}
+.night-lights {
+  animation: light-breathe 2.6s ease-in-out infinite alternate;
+}
+@keyframes tree-sway {
+  0%,
+  100% {
+    transform: rotate(-1.3deg);
+  }
+  50% {
+    transform: rotate(1.3deg);
+  }
+}
+@keyframes banner-wave {
+  0%,
+  100% {
+    transform: skewY(-3deg) scaleX(1);
+  }
+  50% {
+    transform: skewY(5deg) scaleX(0.85);
+  }
+}
+@keyframes flame-flicker {
+  from {
+    transform: scale(0.85, 1);
+  }
+  to {
+    transform: scale(1.1, 0.85);
+  }
+}
+@keyframes npc-step {
+  from {
+    transform: rotate(-13deg);
+  }
+  to {
+    transform: rotate(13deg);
+  }
+}
+@keyframes rain-fall {
+  from {
+    transform: translate(12px, -35px);
+  }
+  to {
+    transform: translate(-12px, 35px);
+  }
+}
+@keyframes smoke-drift {
+  from {
+    opacity: 0.8;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translate(8px, -17px);
+  }
+}
+@keyframes construction-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+@keyframes light-breathe {
+  from {
+    opacity: 0.86;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (max-width: 620px) {
+  .world-toolbar {
+    padding: 9px 8px;
+    gap: 6px;
+    font-size: 9px;
+  }
+  .world-toolbar select {
+    max-width: 104px;
+    font-size: 8px;
+    padding: 5px 2px;
+  }
+  .world-toolbar b {
+    display: none;
+  }
+  .world-options {
+    gap: 10px;
+    font-size: 7px;
+  }
+  .world-options > span {
+    width: 100%;
+    margin: 0;
+  }
+  .test-controls button {
+    padding: 8px;
+    font-size: 10px;
+  }
+  .test-controls > div:first-child > span {
+    font-size: 7px;
+  }
+  .world-options input {
+    width: 15px;
+    height: 15px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tree-crown,
+  .banner-cloth,
+  .flame-flicker,
+  .npc-steps,
+  .rain-drop,
+  .chimney-smoke,
+  .construction-spark,
+  .night-lights {
+    animation: none !important;
+  }
+  .village-npc {
+    display: none;
+  }
+}

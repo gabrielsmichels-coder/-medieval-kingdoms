@@ -25,7 +25,7 @@ export const useGame = create<Store>((set, get) => ({
       const data = await r.json();
       if (!r.ok) throw new Error(data.error);
       if (revision === generation && !get().busy)
-        set({ state: data.state, speed: data.speed, offset: data.serverTime - Date.now() });
+        set({ state: data.state, speed: data.speed, offset: data.state.lastUpdate - Date.now() });
     } catch (e) {
       set({ error: (e as Error).message });
     }
@@ -46,7 +46,7 @@ export const useGame = create<Store>((set, get) => ({
       set({
         state: data.state,
         speed: data.speed,
-        offset: data.serverTime - Date.now(),
+        offset: data.state.lastUpdate - Date.now(),
         busy: false,
       });
       return true;
