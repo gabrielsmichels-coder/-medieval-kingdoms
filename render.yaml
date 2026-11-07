@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: medieval-kingdoms
+    runtime: node
+    plan: starter
+    buildCommand: npm ci --include=dev && npm run db:generate && npm run build
+    startCommand: npm run db:migrate && npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        value: file:/var/data/kingdom.db
+      - key: GAME_SPEED
+        value: "1"
+    disk:
+      name: kingdom-data
+      mountPath: /var/data
+      sizeGB: 1

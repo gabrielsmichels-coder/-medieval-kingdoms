@@ -1,0 +1,32 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "sqlite"
+  url = env("DATABASE_URL")
+}
+model Player {
+  id String @id
+  name String
+  villages Village[]
+}
+model Village {
+  id String @id
+  playerId String
+  player Player @relation(fields: [playerId], references: [id])
+  name String
+  x Int @default(482)
+  y Int @default(517)
+  state String
+  updatedAt DateTime @updatedAt
+  version Int @default(0)
+  receipts ActionReceipt[]
+}
+
+model ActionReceipt {
+  villageId String
+  requestId String
+  village Village @relation(fields: [villageId], references: [id])
+  createdAt DateTime @default(now())
+  @@id([villageId, requestId])
+}
