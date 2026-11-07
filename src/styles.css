@@ -2643,3 +2643,35 @@ tbody tr:hover {
 .buildings-layout:not(:has(.building-panel)) {
   grid-template-columns: 1fr;
 }
+.settings-panel select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #dbe4cd;
+  border-radius: 4px;
+  background: #f6f8ef;
+  color: #6b8259;
+  font: inherit;
+  font-size: 12px;
+}
+.settings-panel select:focus-visible {
+  outline: 3px solid #c6a66c;
+  outline-offset: 3px;
+}
+.nav-label {
+  line-height: 1.6;
+}
+nav button {
+  min-height: 44px;
+}
+.job-title {
+  line-height: 1.6;
+}
+.cost-row {
+  row-gap: 8px;
+}
+.unit-header h3 {
+  line-height: 1.4;
+}
+.army-selection > label > span {
+  line-height: 1.5;
+}

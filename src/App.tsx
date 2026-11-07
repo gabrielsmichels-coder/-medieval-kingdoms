@@ -1,3 +1,4 @@
+import { t, locale, useLanguage } from './i18n';
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -86,7 +87,7 @@ const nav = [
   { name: 'Reports', icon: ScrollText },
   { name: 'Settings', icon: Settings },
 ];
-const fmt = (n: number) => Math.floor(n).toLocaleString();
+const fmt = (n: number) => Math.floor(n).toLocaleString(locale());
 function duration(seconds: number) {
   seconds = Math.max(0, Math.ceil(seconds));
   if (seconds >= 86400)
@@ -104,10 +105,10 @@ function CostRow({ cost, available }: { cost: Cost; available: Cost }) {
           <span
             key={r}
             className={`${r} ${cost[r] > available[r] ? 'insufficient' : ''}`}
-            title={`${r} cost`}
+            title={t(`${r} cost`)}
           >
             <Icon size={14} />
-            {fmt(cost[r])}
+            {t(fmt(cost[r]))}
           </span>
         );
       })}
@@ -127,10 +128,21 @@ function JobItem({ job, now }: { job: Job; now: number }) {
     <div className="job">
       <div className="job-title">
         <span>
-          {name} {job.target && <small>Lv. {job.target}</small>}
-          {job.quantity && <small>×{job.quantity}</small>}
+          {t(name)}{' '}
+          {job.target && (
+            <small>
+              {t('Lv. ')}
+              {job.target}
+            </small>
+          )}
+          {job.quantity && (
+            <small>
+              {'\u00D7'}
+              {job.quantity}
+            </small>
+          )}
         </span>
-        <span>{active ? duration((job.end - now) / 1000) : 'Queued'}</span>
+        <span>{t(active ? duration((job.end - now) / 1000) : 'Queued')}</span>
       </div>
       <div className="progress-track">
         <div style={{ width: `${progress}%` }} />
@@ -167,14 +179,18 @@ function Requirements({
       {Object.entries(requirements).map(([key, level]) => (
         <span className={state.buildings[key] >= level ? 'met' : ''} key={key}>
           {state.buildings[key] >= level ? <Check size={12} /> : <Lock size={11} />}{' '}
-          {buildings[key].name} {state.buildings[key]} / {level}
+          {t(buildings[key].name)} {state.buildings[key]}
+          {' / '}
+          {level}
         </span>
       ))}
-      {tech && (
-        <span className={state.research.includes(tech) ? 'met' : ''}>
-          {state.research.includes(tech) ? <Check size={12} /> : <Lock size={11} />}{' '}
-          {technologies[tech].name}
-        </span>
+      {t(
+        tech && (
+          <span className={state.research.includes(tech) ? 'met' : ''}>
+            {state.research.includes(tech) ? <Check size={12} /> : <Lock size={11} />}{' '}
+            {t(technologies[tech].name)}
+          </span>
+        ),
       )}
     </div>
   );
@@ -213,44 +229,47 @@ function BuildingPanel({
       animate={{ opacity: 1, y: 0 }}
     >
       <div className="panel-eyebrow">
-        BUILDING DETAILS
+        {t('BUILDING DETAILS')}
         <button
           className="icon-button close-detail"
           onClick={onClose}
-          aria-label="Close building details"
+          aria-label={t('Close building details')}
         >
           <X size={16} />
         </button>
       </div>
       <div className={`building-portrait ${building}`}>
         <div className="portrait-halo" />
-        <svg viewBox="-85 -115 170 175" aria-label={`${def.name} illustration`}>
+        <svg viewBox="-85 -115 170 175" aria-label={t(`${def.name} illustration`)}>
           <BuildingArt kind={building} level={level || 1} />
         </svg>
-        <span className="portrait-level">{level ? `LEVEL ${level}` : 'UNBUILT'}</span>
+        <span className="portrait-level">{t(level ? `LEVEL ${level}` : 'UNBUILT')}</span>
       </div>
       <div className="building-panel-body">
         <div className="building-heading">
-          <h2>{def.name}</h2>
+          <h2>{t(def.name)}</h2>
           {locked ? (
             <Lock size={17} />
           ) : (
             <span className="level-badge">
-              {level} / {def.max}
+              {level}
+              {' / '}
+              {def.max}
             </span>
           )}
         </div>
-        <p>{def.description}</p>
+        <p>{t(def.description)}</p>
         <div className="effect-row">
-          <span>Current benefit</span>
-          <strong>{effect(building, level)}</strong>
+          <span>{t('Current benefit')}</span>
+          <strong>{t(effect(building, level))}</strong>
         </div>
         {!max && (
           <div className="next-effect">
             <ArrowUpRight size={16} />
             <span>
-              Level {target}
-              <strong>{effect(building, target)}</strong>
+              {t('Level ')}
+              {target}
+              <strong>{t(effect(building, target))}</strong>
             </span>
           </div>
         )}
@@ -259,19 +278,23 @@ function BuildingPanel({
         )}
         <div className="upgrade-section">
           <div className="section-label">
-            {locked
-              ? 'UNLOCK REQUIREMENTS'
-              : max
-                ? 'FULLY DEVELOPED'
-                : `UPGRADE TO LEVEL ${target}`}
+            {t(
+              locked
+                ? 'UNLOCK REQUIREMENTS'
+                : max
+                  ? 'FULLY DEVELOPED'
+                  : `UPGRADE TO LEVEL ${target}`,
+            )}
           </div>
           {!max && (
             <>
               <CostRow cost={cost} available={available} />
               <div className="upgrade-duration">
                 <Clock size={13} />
-                {duration(
-                  constructionSeconds(building, target, state.buildings.headquarters, speed),
+                {t(
+                  duration(
+                    constructionSeconds(building, target, state.buildings.headquarters, speed),
+                  ),
                 )}
                 <span>
                   <Users size={12} /> {def.population}
@@ -284,26 +307,28 @@ function BuildingPanel({
             disabled={busy || locked || max || !affordable || full}
             onClick={() => void action({ type: 'upgrade', key: building })}
           >
-            {locked ? (
-              <>
-                <Lock size={15} />
-                Building locked
-              </>
-            ) : max ? (
-              <>
-                <CheckCheck size={16} />
-                Maximum level
-              </>
-            ) : full ? (
-              'Construction queue full'
-            ) : !affordable ? (
-              'More resources needed'
-            ) : (
-              <>
-                <Hammer size={16} />
-                {level ? 'Upgrade building' : 'Construct building'}
-                <ArrowRight size={15} />
-              </>
+            {t(
+              locked ? (
+                <>
+                  <Lock size={15} />
+                  {t('Building locked')}
+                </>
+              ) : max ? (
+                <>
+                  <CheckCheck size={16} />
+                  {t('Maximum level')}
+                </>
+              ) : full ? (
+                'Construction queue full'
+              ) : !affordable ? (
+                'More resources needed'
+              ) : (
+                <>
+                  <Hammer size={16} />
+                  {t(level ? 'Upgrade building' : 'Construct building')}
+                  <ArrowRight size={15} />
+                </>
+              ),
             )}
           </button>
         </div>
@@ -320,17 +345,20 @@ function BuildingPanel({
               )
             }
           >
-            Open{' '}
-            {building === 'smithy'
-              ? 'research'
-              : building === 'rally'
-                ? 'army command'
-                : 'recruitment'}{' '}
+            {t('Open')}{' '}
+            {t(
+              building === 'smithy'
+                ? 'research'
+                : building === 'rally'
+                  ? 'army command'
+                  : 'recruitment',
+            )}{' '}
             <ArrowRight size={14} />
           </button>
         )}
         <p className="panel-note">
-          <ShieldCheck size={13} /> Your progress is saved automatically.
+          <ShieldCheck size={13} />
+          {t(' Your progress is saved automatically.')}
         </p>
       </div>
     </motion.aside>
@@ -350,32 +378,41 @@ function Military({
   return (
     <div className="content-view">
       <div className="view-intro">
-        <span className="eyebrow">THE STRENGTH OF YOUR REALM</span>
-        <h2>Raise your banners</h2>
-        <p>Recruit loyal soldiers. Build an army worthy of your kingdom.</p>
+        <span className="eyebrow">{t('THE STRENGTH OF YOUR REALM')}</span>
+        <h2>{t('Raise your banners')}</h2>
+        <p>{t('Recruit loyal soldiers. Build an army worthy of your kingdom.')}</p>
       </div>
       <div className="military-summary">
         <div>
           <Swords />
           <span>
-            Garrison
-            <strong>{fmt(Object.values(state.troops).reduce((a, b) => a + b, 0))} troops</strong>
+            {t('Garrison')}
+            <strong>
+              {t(fmt(Object.values(state.troops).reduce((a, b) => a + b, 0)))}
+              {t(' troops')}
+            </strong>
           </span>
         </div>
         <div>
           <Users />
           <span>
-            Population
+            {t('Population')}
             <strong>
-              {population(state)} / {farmCapacity(state.buildings.farm)}
+              {population(state)}
+              {' / '}
+              {farmCapacity(state.buildings.farm)}
             </strong>
           </span>
         </div>
         <div>
           <Shield />
           <span>
-            Wall defense
-            <strong>+{Math.round(state.buildings.wall * balance.wallBonus * 100)}%</strong>
+            {t('Wall defense')}
+            <strong>
+              {'+'}
+              {Math.round(state.buildings.wall * balance.wallBonus * 100)}
+              {'%'}
+            </strong>
           </span>
         </div>
       </div>
@@ -400,30 +437,42 @@ function Military({
                   )}
                 </div>
                 <div>
-                  <h3>{unit.name}</h3>
-                  <span>{state.troops[key]} in village</span>
+                  <h3>{t(unit.name)}</h3>
+                  <span>
+                    {state.troops[key]}
+                    {t(' in village')}
+                  </span>
                 </div>
                 {locked && <Lock size={17} />}
               </div>
-              <p>{unit.description}</p>
+              <p>{t(unit.description)}</p>
               <div className="stats-grid">
                 <span>
-                  Attack <b>{stats.attack}</b>
+                  {t('Attack ')}
+                  <b>{stats.attack}</b>
                 </span>
                 <span>
-                  Inf. defense <b>{stats.infantryDefense}</b>
+                  {t('Inf. defense ')}
+                  <b>{stats.infantryDefense}</b>
                 </span>
                 <span>
-                  Cav. defense <b>{stats.cavalryDefense}</b>
+                  {t('Cav. defense ')}
+                  <b>{stats.cavalryDefense}</b>
                 </span>
                 <span>
-                  Ranged def. <b>{stats.rangedDefense}</b>
+                  {t('Ranged def. ')}
+                  <b>{stats.rangedDefense}</b>
                 </span>
                 <span>
-                  Travel <b>{unit.speed} min / tile</b>
+                  {t('Travel ')}
+                  <b>
+                    {unit.speed}
+                    {t(' min / tile')}
+                  </b>
                 </span>
                 <span>
-                  Carry <b>{unit.carry}</b>
+                  {t('Carry ')}
+                  <b>{unit.carry}</b>
                 </span>
               </div>
               <Requirements state={state} requirements={unit.requires} tech={unit.tech} />
@@ -431,11 +480,14 @@ function Military({
               <div className="recruit-detail">
                 <span>
                   <Clock size={13} />
-                  {duration(
-                    (unit.seconds *
-                      q *
-                      balance.recruitReduction ** Math.max(0, state.buildings[unit.building] - 1)) /
-                      speed,
+                  {t(
+                    duration(
+                      (unit.seconds *
+                        q *
+                        balance.recruitReduction **
+                          Math.max(0, state.buildings[unit.building] - 1)) /
+                        speed,
+                    ),
                   )}
                 </span>
                 <span>
@@ -445,7 +497,7 @@ function Military({
               </div>
               <div className="recruit-controls">
                 <input
-                  aria-label={`${unit.name} quantity`}
+                  aria-label={t(`${unit.name} quantity`)}
                   type="number"
                   min="1"
                   max="10000"
@@ -470,11 +522,12 @@ function Military({
                   {locked ? (
                     <>
                       <Lock size={13} />
-                      Locked
+                      {t('Locked')}
                     </>
                   ) : (
                     <>
-                      Recruit <ArrowRight size={14} />
+                      {t('Recruit ')}
+                      <ArrowRight size={14} />
                     </>
                   )}
                 </button>
@@ -487,9 +540,12 @@ function Military({
         {['barracks', 'stable'].map((lane) => (
           <div className="panel queue-panel" key={lane}>
             <h3>
-              {buildings[lane].name} queue{' '}
+              {t(buildings[lane].name)}
+              {t(' queue')}{' '}
               <span>
-                {state.jobs.filter((j) => j.lane === lane).length} / {balance.recruitQueueLimit}
+                {state.jobs.filter((j) => j.lane === lane).length}
+                {' / '}
+                {balance.recruitQueueLimit}
               </span>
             </h3>
             {state.jobs
@@ -498,7 +554,7 @@ function Military({
                 <JobItem key={j.id} job={j} now={now} />
               ))}
             {!state.jobs.some((j) => j.lane === lane) && (
-              <p className="muted">Your trainers await new recruits.</p>
+              <p className="muted">{t('Your trainers await new recruits.')}</p>
             )}
           </div>
         ))}
@@ -519,9 +575,9 @@ function Research({
   return (
     <div className="content-view">
       <div className="view-intro">
-        <span className="eyebrow">KNOWLEDGE FORGES POWER</span>
-        <h2>The art of advancement</h2>
-        <p>Turn the knowledge of your smiths into strength on the battlefield.</p>
+        <span className="eyebrow">{t('KNOWLEDGE FORGES POWER')}</span>
+        <h2>{t('The art of advancement')}</h2>
+        <p>{t('Turn the knowledge of your smiths into strength on the battlefield.')}</p>
       </div>
       <div className="research-grid">
         {Object.entries(technologies).map(([key, tech]) => {
@@ -537,16 +593,16 @@ function Research({
                   {done ? <CheckCheck size={26} /> : <BookOpen size={26} />}
                 </div>
                 <div>
-                  <h3>{tech.name}</h3>
+                  <h3>{t(tech.name)}</h3>
                   <span>
-                    {done ? 'Knowledge mastered' : `Smithy level ${tech.requires.smithy}`}
+                    {t(done ? 'Knowledge mastered' : `Smithy level ${tech.requires.smithy}`)}
                   </span>
                 </div>
               </div>
-              <p>{tech.description}</p>
+              <p>{t(tech.description)}</p>
               <div className="research-effect">
                 <Sparkles size={16} />
-                {tech.effect}
+                {t(tech.effect)}
               </div>
               <Requirements state={state} requirements={tech.requires} tech={tech.tech} />
               {job ? (
@@ -556,7 +612,7 @@ function Research({
                   <CostRow cost={tech.cost} available={available} />
                   <div className="recruit-detail">
                     <Clock size={13} />
-                    {duration(tech.seconds / speed)}
+                    {t(duration(tech.seconds / speed))}
                   </div>
                 </>
               )}
@@ -572,23 +628,25 @@ function Research({
                 }
                 onClick={() => void action({ type: 'research', key })}
               >
-                {done ? (
-                  <>
-                    <Check size={15} />
-                    Researched
-                  </>
-                ) : job ? (
-                  'Research in progress'
-                ) : locked ? (
-                  <>
-                    <Lock size={13} />
-                    Requirements not met
-                  </>
-                ) : (
-                  <>
-                    Research technology
-                    <ArrowRight size={14} />
-                  </>
+                {t(
+                  done ? (
+                    <>
+                      <Check size={15} />
+                      {t('Researched')}
+                    </>
+                  ) : job ? (
+                    'Research in progress'
+                  ) : locked ? (
+                    <>
+                      <Lock size={13} />
+                      {t('Requirements not met')}
+                    </>
+                  ) : (
+                    <>
+                      {t('Research technology')}
+                      <ArrowRight size={14} />
+                    </>
+                  ),
                 )}
               </button>
             </div>
@@ -603,34 +661,41 @@ function Rally({ state }: { state: VillageState }) {
   return (
     <div className="content-view">
       <div className="view-intro">
-        <span className="eyebrow">UNDER ONE BANNER</span>
-        <h2>The rally point</h2>
-        <p>Your army, gathered at the heart of the village.</p>
+        <span className="eyebrow">{t('UNDER ONE BANNER')}</span>
+        <h2>{t('The rally point')}</h2>
+        <p>{t('Your army, gathered at the heart of the village.')}</p>
       </div>
       {!unlocked && (
         <div className="notice">
           <Lock size={20} />
           <div>
-            <strong>Establish your Rally Point</strong>
-            <p>Reach Headquarters level 3, then construct the Rally Point to open army command.</p>
+            <strong>{t('Establish your Rally Point')}</strong>
+            <p>
+              {t(
+                'Reach Headquarters level 3, then construct the Rally Point to open army command.',
+              )}
+            </p>
           </div>
         </div>
       )}
       <div className="panel roster">
         <h3>
-          Village garrison{' '}
-          <span>{Object.values(state.troops).reduce((a, b) => a + b, 0)} troops</span>
+          {t('Village garrison')}{' '}
+          <span>
+            {Object.values(state.troops).reduce((a, b) => a + b, 0)}
+            {t(' troops')}
+          </span>
         </h3>
         <div className="roster-table">
           <table>
             <thead>
               <tr>
-                <th>Unit</th>
-                <th>Available</th>
-                <th>Attack</th>
-                <th>Inf. defense</th>
-                <th>Cav. defense</th>
-                <th>Capacity</th>
+                <th>{t('Unit')}</th>
+                <th>{t('Available')}</th>
+                <th>{t('Attack')}</th>
+                <th>{t('Inf. defense')}</th>
+                <th>{t('Cav. defense')}</th>
+                <th>{t('Capacity')}</th>
               </tr>
             </thead>
             <tbody>
@@ -638,7 +703,7 @@ function Rally({ state }: { state: VillageState }) {
                 const stats = troopStats(state, key);
                 return (
                   <tr key={key}>
-                    <td>{unit.name}</td>
+                    <td>{t(unit.name)}</td>
                     <td>{state.troops[key]}</td>
                     <td>{stats.attack}</td>
                     <td>{stats.infantryDefense}</td>
@@ -654,25 +719,34 @@ function Rally({ state }: { state: VillageState }) {
       <ArmyPlanner state={state} />
       <div className="queue-columns">
         <div className="panel queue-panel">
-          <h3>Defensive strength</h3>
+          <h3>{t('Defensive strength')}</h3>
           <div className="effect-row">
-            <span>Wall bonus</span>
-            <strong>+{Math.round(state.buildings.wall * balance.wallBonus * 100)}%</strong>
+            <span>{t('Wall bonus')}</span>
+            <strong>
+              {'+'}
+              {Math.round(state.buildings.wall * balance.wallBonus * 100)}
+              {'%'}
+            </strong>
           </div>
           <div className="effect-row">
-            <span>Regional morale</span>
-            <strong>+{Math.round(state.buildings.church * balance.churchBonus * 100)}%</strong>
+            <span>{t('Regional morale')}</span>
+            <strong>
+              {'+'}
+              {Math.round(state.buildings.church * balance.churchBonus * 100)}
+              {'%'}
+            </strong>
           </div>
           <div className="effect-row">
-            <span>Protected per resource</span>
+            <span>{t('Protected per resource')}</span>
             <strong>{state.buildings.hiding * balance.hidingPerLevel}</strong>
           </div>
         </div>
         <div className="panel queue-panel">
-          <h3>Troop movements</h3>
+          <h3>{t('Troop movements')}</h3>
           <p className="muted">
-            Your troops are stationed at home. Attacks, reinforcements, and travel are planned for
-            the multiplayer expansion.
+            {t(
+              'Your troops are stationed at home. Attacks, reinforcements, and travel are planned for the multiplayer expansion.',
+            )}
           </p>
         </div>
       </div>
@@ -686,10 +760,23 @@ function SettingsView({ state }: { state: VillageState }) {
   return (
     <div className="content-view narrow">
       <div className="view-intro">
-        <span className="eyebrow">MAKE IT YOUR OWN</span>
-        <h2>Your realm, your rules</h2>
-        <p>Manage your village and learn about the realm.</p>
+        <span className="eyebrow">{t('MAKE IT YOUR OWN')}</span>
+        <h2>{t('Your realm, your rules')}</h2>
+        <p>{t('Manage your village and learn about the realm.')}</p>
       </div>
+      <section className="panel settings-panel">
+        <h3>{t('Language')}</h3>
+        <label htmlFor="language">{t('Interface language')}</label>
+        <select
+          id="language"
+          value={useLanguage.getState().language}
+          onChange={(e) => useLanguage.getState().setLanguage(e.target.value as 'pt-BR' | 'en')}
+        >
+          <option value="pt-BR">Português (Brasil)</option>
+          <option value="en">English</option>
+        </select>
+        <p>{t('Choose the language used on this device.')}</p>
+      </section>
       <form
         className="panel settings-panel"
         onSubmit={(e) => {
@@ -697,8 +784,8 @@ function SettingsView({ state }: { state: VillageState }) {
           void action({ type: 'rename', name }).then((ok) => setSaved(ok));
         }}
       >
-        <h3>Village identity</h3>
-        <label htmlFor="village-name">Village name</label>
+        <h3>{t('Village identity')}</h3>
+        <label htmlFor="village-name">{t('Village name')}</label>
         <input
           id="village-name"
           maxLength={32}
@@ -710,37 +797,47 @@ function SettingsView({ state }: { state: VillageState }) {
           }}
         />
         <button className="primary-button" disabled={busy}>
-          {saved ? (
-            <>
-              <Check size={16} />
-              Saved
-            </>
-          ) : (
-            'Save village name'
+          {t(
+            saved ? (
+              <>
+                <Check size={16} />
+                {t('Saved')}
+              </>
+            ) : (
+              'Save village name'
+            ),
           )}
         </button>
       </form>
       <div className="panel settings-panel">
-        <h3>Realm information</h3>
+        <h3>{t('Realm information')}</h3>
         <div className="effect-row">
-          <span>Realm speed</span>
-          <strong>{speed}×</strong>
+          <span>{t('Realm speed')}</span>
+          <strong>
+            {speed}
+            {'\u00D7'}
+          </strong>
         </div>
         <div className="effect-row">
-          <span>Construction queue</span>
-          <strong>{balance.queueLimit} buildings</strong>
+          <span>{t('Construction queue')}</span>
+          <strong>
+            {balance.queueLimit}
+            {t(' buildings')}
+          </strong>
         </div>
         <div className="effect-row">
-          <span>Persistence</span>
-          <strong>Automatic · SQLite</strong>
+          <span>{t('Persistence')}</span>
+          <strong>{t('Automatic \u00B7 SQLite')}</strong>
         </div>
         <p>
-          Production, construction, training, and research continue while you are away. All rates
-          and timers reflect this realm’s speed.
+          {t(
+            'Production, construction, training, and research continue while you are away. All rates and timers reflect this realm\u2019s speed.',
+          )}
         </p>
         <p>
-          This is a single-player village realm. World maps, combat, and alliances are reserved for
-          a future expansion.
+          {t(
+            'This is a single-player village realm. World maps, combat, and alliances are reserved for a future expansion.',
+          )}
         </p>
       </div>
     </div>
@@ -760,27 +857,37 @@ function VillageNotifications({ state }: { state: VillageState }) {
   }, [state.reports[0]?.id]);
   return (
     <div aria-live="polite" className="completion-notifications">
-      {message && (
-        <motion.div
-          className="completion-toast"
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <CheckCheck size={18} />
-          <span>{message}</span>
-          <button
-            className="icon-button"
-            onClick={() => setMessage('')}
-            aria-label="Dismiss notification"
+      {t(
+        message && (
+          <motion.div
+            className="completion-toast"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
           >
-            <X size={14} />
-          </button>
-        </motion.div>
+            <CheckCheck size={18} />
+            <span>{t(message)}</span>
+            <button
+              className="icon-button"
+              onClick={() => setMessage('')}
+              aria-label={t('Dismiss notification')}
+            >
+              <X size={14} />
+            </button>
+          </motion.div>
+        ),
       )}
     </div>
   );
 }
 export default function App() {
+  const language = useLanguage((s) => s.language);
+  useEffect(() => {
+    document.documentElement.lang = language;
+    document.title =
+      language === 'pt-BR'
+        ? 'Medieval Kingdoms · Sua jornada começa'
+        : 'Medieval Kingdoms · Your realm awaits';
+  }, [language]);
   const { state, speed, offset, error, busy, load, clear } = useGame();
   const [view, setView] = useState('Village Overview'),
     [selected, setSelected] = useState('headquarters'),
@@ -808,12 +915,14 @@ export default function App() {
     return (
       <div className="loading-screen">
         <img src="/crest.svg" width="72" />
-        <h1>Medieval Kingdoms</h1>
-        <p>{error || 'Preparing your realm…'}</p>
-        {error && (
-          <button className="primary-button" onClick={() => void load()}>
-            Try again
-          </button>
+        <h1>{t('Medieval Kingdoms')}</h1>
+        <p>{t(error || 'Preparing your realm…')}</p>
+        {t(
+          error && (
+            <button className="primary-button" onClick={() => void load()}>
+              {t('Try again')}
+            </button>
+          ),
         )}
       </div>
     );
@@ -843,10 +952,11 @@ export default function App() {
             navigate('Village Overview');
           }}
         >
-          <img src="/crest.svg" alt="Kingdom crest" />
+          <img src="/crest.svg" alt={t('Kingdom crest')} />
           <span>
-            MEDIEVAL<strong>KINGDOMS</strong>
-            <small>BUILD YOUR LEGACY</small>
+            {t('MEDIEVAL')}
+            <strong>{t('KINGDOMS')}</strong>
+            <small>{t('BUILD YOUR LEGACY')}</small>
           </span>
         </a>
         <div className="realm-selector">
@@ -854,11 +964,16 @@ export default function App() {
             <Map size={19} />
           </span>
           <span>
-            Oakheart Valley<small>Peaceful realm · {speed}× speed</small>
+            {t('Oakheart Valley')}
+            <small>
+              {t('Peaceful realm \u00B7 ')}
+              {speed}
+              {t('\u00D7 speed')}
+            </small>
           </span>
           <span className="status-dot" />
         </div>
-        <div className="nav-label">YOUR KINGDOM</div>
+        <div className="nav-label">{t('YOUR KINGDOM')}</div>
         <nav>
           {nav.map(({ name, icon: Icon }) => (
             <button
@@ -867,7 +982,7 @@ export default function App() {
               onClick={() => navigate(name)}
             >
               <Icon size={19} />
-              <span>{name}</span>
+              <span>{t(name)}</span>
               {name === 'Reports' && unread > 0 ? (
                 <span className="nav-count">{unread}</span>
               ) : view === name ? (
@@ -882,30 +997,37 @@ export default function App() {
               <Leaf size={21} />
             </div>
             <span>
-              A kingdom takes root.
+              {t('A kingdom takes root.')}
               <small>
-                Great things begin with
-                <br />a well-tended village.
+                {t('Great things begin with')}
+                <br />
+                {t('a well-tended village.')}
               </small>
             </span>
           </div>
           <button className="help-button" onClick={() => setHelp(true)}>
-            <HelpCircle size={17} /> A lord’s handbook <ArrowUpRight size={14} />
+            <HelpCircle size={17} />
+            {t(' A lord\u2019s handbook ')}
+            <ArrowUpRight size={14} />
           </button>
           <div className="player">
-            <div className="avatar">S</div>
+            <div className="avatar">{t('S')}</div>
             <span>
-              The Steward<small>Lord of {state.name}</small>
+              {t('The Steward')}
+              <small>
+                {t('Lord of ')}
+                {state.name}
+              </small>
             </span>
             <Shield size={16} />
           </div>
-          <small className="version">MEDIEVAL KINGDOMS · v1.0</small>
+          <small className="version">{t('MEDIEVAL KINGDOMS \u00B7 v1.0')}</small>
         </div>
       </aside>
       {mobile && (
         <button
           className="sidebar-backdrop"
-          aria-label="Close navigation"
+          aria-label={t('Close navigation')}
           onClick={() => setMobile(false)}
         />
       )}
@@ -915,7 +1037,7 @@ export default function App() {
           <button
             className="icon-button mobile-menu"
             onClick={() => setMobile(true)}
-            aria-label="Open navigation"
+            aria-label={t('Open navigation')}
           >
             <Menu size={22} />
           </button>
@@ -923,7 +1045,7 @@ export default function App() {
             <Flag size={21} />
             <div>
               <strong>{state.name}</strong>
-              <small>482 | 517 · K54</small>
+              <small>{t('482 | 517 \u00B7 K54')}</small>
             </div>
             <ChevronDown size={13} />
           </div>
@@ -937,15 +1059,22 @@ export default function App() {
                   </div>
                   <div>
                     <strong>
-                      {fmt(available[r])}
-                      <small> / {fmt(cap)}</small>
+                      {t(fmt(available[r]))}
+                      <small>
+                        {' / '}
+                        {t(fmt(cap))}
+                      </small>
                     </strong>
                     <span>
-                      +{fmt(rate[r])}/h{' '}
-                      <i title="Time until storage is full">
-                        {available[r] >= cap
-                          ? 'Full'
-                          : duration(((cap - available[r]) / rate[r]) * 3600)}
+                      {'+'}
+                      {t(fmt(rate[r]))}
+                      {t('/h')}{' '}
+                      <i title={t('Time until storage is full')}>
+                        {t(
+                          available[r] >= cap
+                            ? 'Full'
+                            : duration(((cap - available[r]) / rate[r]) * 3600),
+                        )}
                       </i>
                     </span>
                   </div>
@@ -959,15 +1088,18 @@ export default function App() {
               <div>
                 <strong>
                   {population(state)}
-                  <small> / {fmt(farmCapacity(state.buildings.farm))}</small>
+                  <small>
+                    {' / '}
+                    {t(fmt(farmCapacity(state.buildings.farm)))}
+                  </small>
                 </strong>
-                <span>Population</span>
+                <span>{t('Population')}</span>
               </div>
             </div>
           </div>
           <button
             className="notification-button icon-button"
-            aria-label="View notifications"
+            aria-label={t('View notifications')}
             onClick={() => setNotifications(!notifications)}
           >
             <Bell size={20} />
@@ -978,22 +1110,27 @@ export default function App() {
           <div className="page-heading">
             <div>
               <div className="breadcrumbs">
-                Your kingdom <ChevronRight size={11} />
-                <span>{view}</span>
+                {t('Your kingdom ')}
+                <ChevronRight size={11} />
+                <span>{t(view)}</span>
               </div>
-              <h1>{view === 'Village Overview' ? 'A village. A vision. A kingdom.' : view}</h1>
+              <h1>{t(view === 'Village Overview' ? 'A village. A vision. A kingdom.' : view)}</h1>
               <p>
-                {view === 'Village Overview'
-                  ? 'Every great kingdom begins with a single village. This one is yours.'
-                  : 'Shape the future of your growing realm.'}
+                {t(
+                  view === 'Village Overview'
+                    ? 'Every great kingdom begins with a single village. This one is yours.'
+                    : 'Shape the future of your growing realm.',
+                )}
               </p>
             </div>
             <div className="season">
-              <span className="sun-icon">☀</span>
+              <span className="sun-icon">{'\u2600'}</span>
               <span>
-                Year 1 · The Age of Beginnings
+                {t('Year 1 \u00B7 The Age of Beginnings')}
                 <small>
-                  Spring <span>•</span> A new dawn
+                  {t('Spring ')}
+                  <span>{'\u2022'}</span>
+                  {t(' A new dawn')}
                 </small>
               </span>
             </div>
@@ -1006,26 +1143,31 @@ export default function App() {
                     <div>
                       <span className="status-dot" />
                       <h2>{state.name}</h2>
-                      <span className="tag">YOUR VILLAGE</span>
+                      <span className="tag">{t('YOUR VILLAGE')}</span>
                     </div>
                     <span className="village-points">
                       <Shield size={14} />
-                      {score} points
+                      {score}
+                      {t(' points')}
                     </span>
                   </div>
                   <VillageMap state={state} selected={selected} onSelect={setSelected} />
                   <div className="map-footer">
                     <span>
-                      <span className="status-dot" /> Village at peace
+                      <span className="status-dot" />
+                      {t(' Village at peace')}
                     </span>
                     <span>
                       <House size={13} />
-                      {Object.values(state.buildings).filter((x) => x > 0).length} buildings <i />{' '}
-                      <Users size={13} />
-                      {population(state)} villagers
+                      {Object.values(state.buildings).filter((x) => x > 0).length}
+                      {t(' buildings ')}
+                      <i /> <Users size={13} />
+                      {population(state)}
+                      {t(' villagers')}
                     </span>
                     <span className="click-hint">
-                      Select a building to manage <ArrowUpRight size={13} />
+                      {t('Select a building to manage ')}
+                      <ArrowUpRight size={13} />
                     </span>
                   </div>
                   <div className="overview-bottom">
@@ -1033,10 +1175,12 @@ export default function App() {
                       <div className="card-heading">
                         <h3>
                           <Hammer size={17} />
-                          Construction
+                          {t('Construction')}
                         </h3>
                         <span>
-                          {construction.length} / {balance.queueLimit}
+                          {construction.length}
+                          {' / '}
+                          {balance.queueLimit}
                         </span>
                       </div>
                       {construction.length ? (
@@ -1047,28 +1191,33 @@ export default function App() {
                             <Hammer size={22} />
                           </div>
                           <div>
-                            <strong>Your next chapter awaits</strong>
-                            <p>Choose a building and start an upgrade.</p>
+                            <strong>{t('Your next chapter awaits')}</strong>
+                            <p>{t('Choose a building and start an upgrade.')}</p>
                           </div>
                           <ArrowUpRight size={18} />
                         </div>
                       )}
                       <div className="queue-foot">
-                        <Clock size={12} /> Construction continues while you’re away.
+                        <Clock size={12} />
+                        {t(' Construction continues while you\u2019re away.')}
                       </div>
                     </section>
                     <section className="panel growing-panel">
                       <div className="card-heading">
                         <h3>
-                          <Leaf size={17} />A growing realm
+                          <Leaf size={17} />
+                          {t('A growing realm')}
                         </h3>
-                        <span className="tag">CHAPTER I</span>
+                        <span className="tag">{t('CHAPTER I')}</span>
                       </div>
-                      <h4>Lay the foundations</h4>
-                      <p>A stronger Headquarters opens the way to a military of your own.</p>
+                      <h4>{t('Lay the foundations')}</h4>
+                      <p>{t('A stronger Headquarters opens the way to a military of your own.')}</p>
                       <div className="goal">
-                        <span>Headquarters level 3</span>
-                        <strong>{Math.min(3, state.buildings.headquarters)} / 3</strong>
+                        <span>{t('Headquarters level 3')}</span>
+                        <strong>
+                          {Math.min(3, state.buildings.headquarters)}
+                          {' / 3'}
+                        </strong>
                       </div>
                       <div className="progress-track">
                         <div
@@ -1086,34 +1235,38 @@ export default function App() {
                         }}
                       >
                         {' '}
-                        {state.buildings.headquarters >= 3
-                          ? 'Build your barracks'
-                          : 'Develop your headquarters'}
+                        {t(
+                          state.buildings.headquarters >= 3
+                            ? 'Build your barracks'
+                            : 'Develop your headquarters',
+                        )}
                         <ArrowRight size={13} />
                       </button>
                     </section>
                   </div>
                 </section>
-                {selected && (
-                  <BuildingPanel
-                    building={selected}
-                    state={state}
-                    available={available}
-                    now={serverNow}
-                    onClose={() => setSelected('')}
-                    onNavigate={navigate}
-                  />
+                {t(
+                  selected && (
+                    <BuildingPanel
+                      building={selected}
+                      state={state}
+                      available={available}
+                      now={serverNow}
+                      onClose={() => setSelected('')}
+                      onNavigate={navigate}
+                    />
+                  ),
                 )}
               </div>
               <div className="realm-footer">
                 <span>
                   <ShieldCheck size={13} />
-                  Your legacy is safely recorded.
+                  {t('Your legacy is safely recorded.')}
                 </span>
-                <span>THE ROOTS OF A KINGDOM RUN DEEP.</span>
+                <span>{t('THE ROOTS OF A KINGDOM RUN DEEP.')}</span>
                 <span>
                   <span className="status-dot" />
-                  Connected to realm
+                  {t('Connected to realm')}
                 </span>
               </div>
             </>
@@ -1121,9 +1274,9 @@ export default function App() {
             <div className="content-view">
               <div className="building-list-header">
                 <div className="view-intro">
-                  <span className="eyebrow">STONE BY STONE</span>
-                  <h2>Build a lasting legacy</h2>
-                  <p>Develop your village. New possibilities emerge as your realm grows.</p>
+                  <span className="eyebrow">{t('STONE BY STONE')}</span>
+                  <h2>{t('Build a lasting legacy')}</h2>
+                  <p>{t('Develop your village. New possibilities emerge as your realm grows.')}</p>
                 </div>
                 <div className="filter-tabs">
                   {['All', 'Economy', 'Village', 'Military'].map((x) => (
@@ -1132,7 +1285,7 @@ export default function App() {
                       onClick={() => setCategory(x)}
                       key={x}
                     >
-                      {x}
+                      {t(x)}
                     </button>
                   ))}
                 </div>
@@ -1155,16 +1308,18 @@ export default function App() {
                           </div>
                           <div>
                             <h3>
-                              {def.name}{' '}
+                              {t(def.name)}{' '}
                               <small>
-                                {state.buildings[key]
-                                  ? `Level ${state.buildings[key]}`
-                                  : locked
-                                    ? 'Locked'
-                                    : 'Available'}
+                                {t(
+                                  state.buildings[key]
+                                    ? `Level ${state.buildings[key]}`
+                                    : locked
+                                      ? 'Locked'
+                                      : 'Available',
+                                )}
                               </small>
                             </h3>
-                            <p>{effect(key, state.buildings[key])}</p>
+                            <p>{t(effect(key, state.buildings[key]))}</p>
                             {locked && <Requirements state={state} requirements={def.requires} />}
                           </div>
                           {locked ? <Lock size={16} /> : <ChevronRight size={17} />}
@@ -1172,24 +1327,26 @@ export default function App() {
                       );
                     })}
                 </div>
-                {selected && (
-                  <BuildingPanel
-                    building={selected}
-                    state={state}
-                    available={available}
-                    now={serverNow}
-                    onClose={() => setSelected('')}
-                    onNavigate={navigate}
-                  />
+                {t(
+                  selected && (
+                    <BuildingPanel
+                      building={selected}
+                      state={state}
+                      available={available}
+                      now={serverNow}
+                      onClose={() => setSelected('')}
+                      onNavigate={navigate}
+                    />
+                  ),
                 )}
               </div>
               <div className="panel queue-panel">
-                <h3>Construction queue</h3>
+                <h3>{t('Construction queue')}</h3>
                 {construction.map((j) => (
                   <JobItem key={j.id} job={j} now={serverNow} />
                 ))}
                 {!construction.length && (
-                  <p className="muted">Select a building to start construction.</p>
+                  <p className="muted">{t('Select a building to start construction.')}</p>
                 )}
               </div>
             </div>
@@ -1203,9 +1360,12 @@ export default function App() {
             <div className="content-view">
               <div className="reports-heading">
                 <div className="view-intro">
-                  <span className="eyebrow">THE CHRONICLES OF {state.name.toUpperCase()}</span>
-                  <h2>A record of your reign</h2>
-                  <p>News, milestones, and the quiet progress of your village.</p>
+                  <span className="eyebrow">
+                    {t('THE CHRONICLES OF ')}
+                    {state.name.toUpperCase()}
+                  </span>
+                  <h2>{t('A record of your reign')}</h2>
+                  <p>{t('News, milestones, and the quiet progress of your village.')}</p>
                 </div>
                 <button
                   className="secondary-button"
@@ -1215,7 +1375,7 @@ export default function App() {
                   }}
                 >
                   <CheckCheck size={15} />
-                  Mark all read
+                  {t('Mark all read')}
                 </button>
               </div>
               <div className="panel reports-list">
@@ -1233,10 +1393,10 @@ export default function App() {
                       )}
                     </div>
                     <div>
-                      <h3>{r.title}</h3>
-                      <p>{r.detail}</p>
+                      <h3>{t(r.title)}</h3>
+                      <p>{t(r.detail)}</p>
                     </div>
-                    <time>{new Date(r.time).toLocaleString()}</time>
+                    <time>{t(new Date(r.time).toLocaleString(locale()))}</time>
                   </div>
                 ))}
               </div>
@@ -1247,20 +1407,22 @@ export default function App() {
         </main>
       </div>
       <AnimatePresence>
-        {error && (
-          <motion.div
-            className="error-toast"
-            role="alert"
-            initial={{ y: 30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <Shield size={19} />
-            <span>{error}</span>
-            <button onClick={clear} aria-label="Dismiss error">
-              <X size={16} />
-            </button>
-          </motion.div>
+        {t(
+          error && (
+            <motion.div
+              className="error-toast"
+              role="alert"
+              initial={{ y: 30, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <Shield size={19} />
+              <span>{t(error)}</span>
+              <button onClick={clear} aria-label={t('Dismiss error')}>
+                <X size={16} />
+              </button>
+            </motion.div>
+          ),
         )}
         {notifications && (
           <motion.div
@@ -1269,23 +1431,23 @@ export default function App() {
             animate={{ opacity: 1, y: 0 }}
           >
             <div className="card-heading">
-              <h3>Village news</h3>
+              <h3>{t('Village news')}</h3>
               <button
                 className="icon-button"
                 onClick={() => setNotifications(false)}
-                aria-label="Close notifications"
+                aria-label={t('Close notifications')}
               >
                 <X size={16} />
               </button>
             </div>
             {state.reports.slice(0, 5).map((r) => (
               <div className="notification-item" key={r.id}>
-                <strong>{r.title}</strong>
-                <p>{r.detail}</p>
+                <strong>{t(r.title)}</strong>
+                <p>{t(r.detail)}</p>
               </div>
             ))}
             <button className="text-link" onClick={() => navigate('Reports')}>
-              View the chronicles
+              {t('View the chronicles')}
               <ArrowRight size={14} />
             </button>
           </motion.div>
@@ -1300,46 +1462,57 @@ export default function App() {
             >
               <div className="card-heading">
                 <h3>
-                  <BookOpen size={20} /> A lord’s handbook
+                  <BookOpen size={20} />
+                  {t(' A lord\u2019s handbook')}
                 </h3>
                 <button
                   className="icon-button"
-                  aria-label="Close handbook"
+                  aria-label={t('Close handbook')}
                   onClick={() => setHelp(false)}
                 >
                   <X size={20} />
                 </button>
               </div>
-              <h2>Plant the seeds of a kingdom.</h2>
+              <h2>{t('Plant the seeds of a kingdom.')}</h2>
               <p>
-                Your timber camp, clay pit, and iron mine produce resources every hour, even while
-                you’re away. Upgrade them to grow your economy.
+                {t(
+                  'Your timber camp, clay pit, and iron mine produce resources every hour, even while you\u2019re away. Upgrade them to grow your economy.',
+                )}
               </p>
               <ol>
                 <li>
-                  <b>Build your foundations.</b> Click a village building to upgrade it. Your
-                  Headquarters unlocks new buildings and speeds up construction.
+                  <b>{t('Build your foundations.')}</b>
+                  {t(
+                    ' Click a village building to upgrade it. Your Headquarters unlocks new buildings and speeds up construction.',
+                  )}
                 </li>
                 <li>
-                  <b>Make room to grow.</b> Expand the Warehouse before resources fill up. Upgrade
-                  the Farm to support buildings and troops.
+                  <b>{t('Make room to grow.')}</b>
+                  {t(
+                    ' Expand the Warehouse before resources fill up. Upgrade the Farm to support buildings and troops.',
+                  )}
                 </li>
                 <li>
-                  <b>Raise a garrison.</b> Reach Headquarters level 3 and construct a Barracks.
-                  Train spearmen and axemen to begin your army.
+                  <b>{t('Raise a garrison.')}</b>
+                  {t(
+                    ' Reach Headquarters level 3 and construct a Barracks. Train spearmen and axemen to begin your army.',
+                  )}
                 </li>
                 <li>
-                  <b>Advance your knowledge.</b> Unlock the Smithy with Headquarters 5 and Barracks
-                  3. Research equipment and new units.
+                  <b>{t('Advance your knowledge.')}</b>
+                  {t(
+                    ' Unlock the Smithy with Headquarters 5 and Barracks 3. Research equipment and new units.',
+                  )}
                 </li>
               </ol>
               <p>
-                Costs are paid when a job is queued. Buildings share one construction lane;
-                Barracks, Stable, and Smithy each work independently. Recruitment arrives as a
-                completed batch.
+                {t(
+                  'Costs are paid when a job is queued. Buildings share one construction lane; Barracks, Stable, and Smithy each work independently. Recruitment arrives as a completed batch.',
+                )}
               </p>
               <button className="primary-button" onClick={() => setHelp(false)}>
-                My village awaits <ArrowRight size={16} />
+                {t('My village awaits ')}
+                <ArrowRight size={16} />
               </button>
             </motion.div>
           </div>
@@ -1347,7 +1520,8 @@ export default function App() {
       </AnimatePresence>
       {busy && (
         <div className="saving-indicator">
-          <span className="status-dot" /> Recording your decree…
+          <span className="status-dot" />
+          {t(' Recording your decree\u2026')}
         </div>
       )}
     </div>

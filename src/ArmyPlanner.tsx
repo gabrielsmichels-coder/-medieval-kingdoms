@@ -1,3 +1,4 @@
+import { t, locale } from './i18n';
 import { useState } from 'react';
 import { Check, Flag, Lock, Swords, Package, Clock } from 'lucide-react';
 import { units } from '../shared/config';
@@ -32,23 +33,30 @@ export default function ArmyPlanner({ state }: { state: VillageState }) {
       <div className="card-heading">
         <h3>
           <Flag size={17} />
-          Army muster plan
+          {t('Army muster plan')}
         </h3>
-        <span>{totals.count} selected</span>
+        <span>
+          {totals.count}
+          {t(' selected')}
+        </span>
       </div>
       <p>
-        Organize a company for future expeditions. Saving a plan keeps your troops stationed safely
-        at home.
+        {t(
+          'Organize a company for future expeditions. Saving a plan keeps your troops stationed safely at home.',
+        )}
       </p>
       <div className="army-selection">
         {Object.entries(units).map(([key, unit]) => (
           <label key={key}>
             <span>
-              {unit.name}
-              <small>{state.troops[key]} available</small>
+              {t(unit.name)}
+              <small>
+                {state.troops[key]}
+                {t(' available')}
+              </small>
             </span>
             <input
-              aria-label={`Muster ${unit.name}`}
+              aria-label={t(`Muster ${unit.name}`)}
               type="number"
               min="0"
               max={state.troops[key]}
@@ -71,32 +79,34 @@ export default function ArmyPlanner({ state }: { state: VillageState }) {
       <div className="army-totals">
         <span>
           <Swords size={15} />
-          {totals.attack.toLocaleString()} attack
+          {t(totals.attack.toLocaleString(locale()))}
+          {t(' attack')}
         </span>
         <span>
           <Package size={15} />
-          {totals.carry.toLocaleString()} carrying capacity
+          {t(totals.carry.toLocaleString(locale()))}
+          {t(' carrying capacity')}
         </span>
         <span>
           <Clock size={15} />
-          {totals.speed ? `${totals.speed} min / tile` : 'No troops selected'}
+          {t(totals.speed ? `${totals.speed} min / tile` : 'No troops selected')}
         </span>
       </div>
       <button className="primary-button" disabled={busy || !unlocked}>
         {!unlocked ? (
           <>
             <Lock size={14} />
-            Rally Point required
+            {t('Rally Point required')}
           </>
         ) : saved ? (
           <>
             <Check size={14} />
-            Muster plan saved
+            {t('Muster plan saved')}
           </>
         ) : (
           <>
             <Flag size={14} />
-            Save muster plan
+            {t('Save muster plan')}
           </>
         )}
       </button>

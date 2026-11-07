@@ -44,6 +44,12 @@ The production server serves both the Vite build and API at http://localhost:300
 - Reports record completed jobs, full storage, and building unlocks. Settings changes the persistent village name.
 - Progress continues offline and across server restarts. No reset or cheat button is exposed to players.
 
+## Idioma / Language
+
+A interface abre em português do Brasil por padrão. Para mudar, acesse **Configurações → Idioma da interface → English** (ou **Settings → Interface language → Português (Brasil)**). A escolha é salva neste navegador, independentemente da aldeia. Textos, nomes de edifícios e unidades, pesquisas, mensagens de erro e relatórios antigos são traduzidos na interface; os identificadores do jogo e os nomes personalizados da aldeia permanecem intactos. Números e datas usam o formato do idioma selecionado.
+
+The interface defaults to Brazilian Portuguese and supports English in Settings. The catalog and dynamic report translations are in `src/i18n.ts`. Locale coverage is checked by `tests/i18n.test.ts`; browser checks verify switching, reload persistence, and Portuguese defaults on a fresh device.
+
 ## Configuration
 
 `shared/config.ts` contains all building definitions, max levels, costs, growth factors, prerequisites, construction durations, unit costs / statistics / times, technologies / effects, production and storage tables, farm growth, defensive modifiers, population rules, and queue limits. `GAME_SPEED` scales production, construction, research, and recruitment. Client resource counters interpolate the authoritative snapshot; the server validates every purchase.

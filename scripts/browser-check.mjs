@@ -30,6 +30,9 @@ const page = await browser.newPage({
   viewport: { width: 1440, height: 1000 },
   deviceScaleFactor: 1,
 });
+await page.addInitScript(() => {
+  if (!localStorage.getItem('mk-language')) localStorage.setItem('mk-language', 'en');
+});
 const errors = [];
 page.on('pageerror', (e) => errors.push(e.message));
 try {
@@ -60,8 +63,18 @@ try {
   await page.getByLabel('Village name').fill('Oakheart');
   await page.getByRole('button', { name: 'Save village name' }).click();
   await page.getByRole('button', { name: 'Saved', exact: true }).waitFor();
+  await page.getByLabel('Interface language').selectOption('pt-BR');
+  await page.getByRole('heading', { name: 'Seu reino, suas regras' }).waitFor();
+  assert.equal(await page.locator('html').getAttribute('lang'), 'pt-BR');
   await page.reload();
-  await page.getByRole('heading', { name: 'A village. A vision. A kingdom.' }).waitFor();
+  await page.getByRole('heading', { name: 'Uma aldeia. Uma visão. Um reino.' }).waitFor();
+  await page.getByRole('button', { name: 'Configurações', exact: true }).click();
+  assert.equal(await page.getByLabel('Idioma da interface').inputValue(), 'pt-BR');
+  await page.getByLabel('Idioma da interface').selectOption('en');
+  await page.getByRole('heading', { name: 'Your realm, your rules' }).waitFor();
+  await page.getByLabel('Interface language').selectOption('pt-BR');
+  await page.getByRole('button', { name: 'Visão geral da aldeia', exact: true }).click();
+  await page.getByRole('heading', { name: 'Edifício Principal', exact: true }).waitFor();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.waitForTimeout(300);
   await page.screenshot({ path: 'test-results/mobile.png', fullPage: true });
@@ -69,15 +82,23 @@ try {
     await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
     'No horizontal overflow',
   );
-  await page.getByRole('button', { name: 'Open navigation' }).click();
-  await page.getByRole('navigation').getByRole('button', { name: 'Military', exact: true }).click();
-  await page.getByRole('heading', { name: 'Raise your banners' }).waitFor();
+  await page.getByRole('button', { name: 'Abrir navegação' }).click();
+  await page.getByRole('navigation').getByRole('button', { name: 'Militar', exact: true }).click();
+  await page.getByRole('heading', { name: 'Erga seus estandartes' }).waitFor();
   await page.waitForTimeout(300);
   await page.screenshot({ path: 'test-results/mobile-military.png', fullPage: true });
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+  // A fresh device opens in Brazilian Portuguese without a stored preference.
+  const fresh = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  await fresh.goto(base);
+  await fresh.getByRole('heading', { name: 'Uma aldeia. Uma visão. Um reino.' }).waitFor();
+  assert.equal(await fresh.locator('html').getAttribute('lang'), 'pt-BR');
+  await fresh.getByRole('button', { name: 'Edifício Principal, nível 1' }).click();
+  await fresh.getByRole('button', { name: 'Melhorar edifício', exact: true }).waitFor();
+  await fresh.close();
   assert.deepEqual(errors, []);
   console.log(
-    'Browser checks passed: desktop, map selection, purchase, navigation, settings persistence, mobile layout, no runtime errors.',
+    'Browser checks passed: desktop, map selection, purchase, navigation, settings persistence, PT-BR default, language switching and persistence, mobile layout, no runtime errors.',
   );
 } finally {
   await browser.close();

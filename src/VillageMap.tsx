@@ -1,3 +1,4 @@
+import { t } from './i18n';
 import { useState } from 'react';
 import { Plus, Minus } from 'lucide-react';
 import { buildings } from '../shared/config';
@@ -144,7 +145,7 @@ export default function VillageMap({
           className="village-svg"
           viewBox="0 0 1000 610"
           role="img"
-          aria-label="Interactive isometric map of your village"
+          aria-label={t('Interactive isometric map of your village')}
         >
           <defs>
             <linearGradient id="ground" x2="0" y2="1">
@@ -240,7 +241,7 @@ export default function VillageMap({
                   className={`map-building ${selected === key ? 'selected' : ''} ${level === 0 ? 'unbuilt' : ''}`}
                   role="button"
                   tabIndex={0}
-                  aria-label={`${buildings[key].name}, level ${level}`}
+                  aria-label={t(`${buildings[key].name}, level ${level}`)}
                   onClick={() => onSelect(key)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
@@ -274,9 +275,9 @@ export default function VillageMap({
                     transform={`translate(${x} ${y + (key === 'headquarters' ? 60 : 43)})`}
                   >
                     <rect
-                      x={-buildings[key].name.length * 3.2 - 13}
+                      x={-t(buildings[key].name).length * 3.2 - 13}
                       y="-12"
-                      width={buildings[key].name.length * 6.4 + 26}
+                      width={t(buildings[key].name).length * 6.4 + 26}
                       height="23"
                       rx="5"
                       fill={selected === key ? '#304f3e' : '#f4eedb'}
@@ -290,7 +291,7 @@ export default function VillageMap({
                       fontFamily="system-ui"
                       fontWeight="600"
                     >
-                      {buildings[key].name} {level > 0 ? `· ${level}` : '+'}
+                      {t(buildings[key].name)} {t(level > 0 ? `· ${level}` : '+')}
                     </text>
                   </g>
                 </g>
@@ -302,7 +303,7 @@ export default function VillageMap({
             <path d="m0-24 6 24-6 24-6-24Z" fill="#e0d9ac" />
             <path d="m0-24 6 24H0Z" fill="#536d4d" />
             <text y="-42" textAnchor="middle" fill="#526649" stroke="none" fontSize="11">
-              N
+              {t('N')}
             </text>
           </g>
         </svg>
@@ -311,24 +312,29 @@ export default function VillageMap({
         <button
           onClick={() => setZoom(Math.max(1, +(zoom - 0.4).toFixed(1)))}
           disabled={zoom <= 1}
-          aria-label="Zoom out village map"
+          aria-label={t('Zoom out village map')}
         >
           <Minus size={13} />
         </button>
-        <span>{Math.round(zoom * 100)}%</span>
+        <span>
+          {Math.round(zoom * 100)}
+          {'%'}
+        </span>
         <button
           onClick={() => setZoom(Math.min(2.2, +(zoom + 0.4).toFixed(1)))}
           disabled={zoom >= 2.2}
-          aria-label="Zoom in village map"
+          aria-label={t('Zoom in village map')}
         >
           <Plus size={13} />
         </button>
       </div>
       <div className="map-caption">
-        <span className="status-dot" /> A living village. A growing legacy.
+        <span className="status-dot" />
+        {t(' A living village. A growing legacy.')}
       </div>
       <div className="map-coordinate">
-        OAKHEART VALLEY <span>482 | 517</span>
+        {t('OAKHEART VALLEY ')}
+        <span>{'482 | 517'}</span>
       </div>
     </div>
   );
