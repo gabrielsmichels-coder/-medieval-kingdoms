@@ -6,7 +6,7 @@ An original, playable single-player medieval village strategy game. React + Type
 
 [Publicar Medieval Kingdoms no Render](https://render.com/deploy?repo=https://github.com/gabrielsmichels-coder/-medieval-kingdoms)
 
-Entre na sua conta, autorize o acesso ao repositório e revise o Blueprint antes de confirmar. A configuração usa um serviço Starter e disco persistente, ambos pagos, para preservar o progresso em SQLite. Após concluir o deploy, abra o endereço HTTPS exibido pelo Render no computador ou celular. A versão publicada começa em velocidade normal (1×); para testar mais rápido, altere `GAME_SPEED` para `12` nas variáveis do serviço e reinicie-o. A publicação atual usa um único perfil de jogo compartilhado por quem acessar o endereço.
+Entre na sua conta, autorize o acesso ao repositório e revise o Blueprint antes de confirmar. A configuração usa o plano gratuito do Render, sem disco persistente. O SQLite salva durante o uso, mas o progresso pode ser perdido quando o serviço reiniciar, for atualizado ou voltar após suspensão. O primeiro acesso após inatividade pode demorar enquanto o servidor inicia. Após concluir o deploy, abra o endereço HTTPS exibido pelo Render no computador ou celular. A versão publicada começa em velocidade normal (1×); para testar mais rápido, altere `GAME_SPEED` para `12` nas variáveis do serviço e reinicie-o. A publicação atual usa um único perfil de jogo compartilhado por quem acessar o endereço.
 
 ## Run locally
 
@@ -73,7 +73,7 @@ The browser runner builds the app, starts a separate server on port 3002 with a 
 
 ## Render deployment
 
-Use the included `render.yaml` blueprint. It provisions a paid single-instance Node service with a persistent disk at `/var/data`; SQLite is stored at `/var/data/kingdom.db`. The build generates Prisma and compiles both apps; startup applies migrations before serving traffic. Set the desired realm speed in Render. Back up the SQLite database using SQLite backup tooling or a stopped service snapshot. A free ephemeral filesystem will lose saves on redeploy and is unsuitable for persistent play.
+Use the included `render.yaml` blueprint for a free trial deployment. It provisions one free Node web service without a persistent disk, with SQLite at `prisma/kingdom.db` (`DATABASE_URL=file:./kingdom.db`). The build generates Prisma and compiles both apps; startup creates the database and applies migrations before serving traffic. Render may suspend free services when idle, causing a cold start on the next visit. The filesystem is ephemeral: saved progress may be lost after restarts, redeploys, or resumption. This mode is intended for testing. For durable hosted play, change the plan to Starter, add a persistent disk mounted at `/var/data`, and set `DATABASE_URL=file:/var/data/kingdom.db`. Set the desired realm speed in Render. Existing Blueprint setup forms must be reopened or refreshed to load the updated free configuration.
 
 ## Scope
 
